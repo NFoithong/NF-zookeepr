@@ -2,8 +2,6 @@ const express = require('express');
 const { listen } = require('express/lib/application');
 const app = express();
 
-const PORT = process.env.PORT || 3001;
-
 //creating a route that the front-end can request data from.
 const { animals } = require('./data/animals.json');
 
@@ -63,6 +61,7 @@ app.get('/api/animals', (req, res) => {
 
 
 
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
