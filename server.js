@@ -1,8 +1,17 @@
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const { listen } = require('express/lib/application');
 const PORT = process.env.PORT || 3001;
 
 const app = express();
+
+//Parse Incoming Data
+//parse incoming string or array data
+app.use(express.urlencoded({ extended: true }));
+//parse incoming JSON data
+app.use(express.json());
+
 
 //creating a route that the front-end can request data from.
 const { animals } = require('./data/animals.json');
@@ -53,6 +62,43 @@ function findById(id, animalsArray) {
     return result;
 }
 
+//created a function that accepts the POST route's req.body value and the array we want to add the data to. 
+//Add Function to Handle Animal Creation
+function createNewAnimal(body, animalsArray) {
+    // console.log(body);
+    //our function's main code will go here!
+    const animal = body;
+    animalsArray.push(animal);
+
+    fs.writeFileSync(
+        path.join(__dirname, './data/animals.json'),
+        //save the JavaScript array data as JSON,
+        JSON.stringify({ animals: animalsArray }, null, 2)
+    );
+    //return finished code to post route for response
+    return animal;
+    // return body;
+}
+
+//Add Validation to Our Data
+function validateAnimal(animal) {
+    if (!animal.name || typeof animal.name !== 'string') {
+        return false;
+    }
+    if (!animal.speices || typeof animal.species !== 'string') {
+        return false;
+    }
+    if (!animal.diet || typeof animal.diet !== 'string') {
+        return false;
+    }
+    if (!animal.personalityTraits || !Array.isArray(animal.personalityTraits)) {
+        return false;
+    }
+    return true;
+}
+
+
+
 // app.get('/api/animals', (req, res) => {
 //     res.json(animals);
 // });
@@ -73,7 +119,25 @@ app.get('/api/animals/:id', (req, res) => {
     }
 })
 
+//Users of the app populate the server with data by sending data from 
+//the client side of the application to the server.
+app.post('/api/animals', (req, res) => {
+    //res.body is where our incoming content will be
+    //set id based on what the nesxt index of the array will be
+    req.body.id = animals.length.toString();
+    // console.log(req.body);
 
+    // if any data in req.body is incorrect, send 404 error back
+    if (!validateAnimal(req.body)) {
+        res.status(400).send('The animal is not properly formatted.');
+    } else {
+        // Write Animal Data to JSON
+        // add animal to json file and animals array in this function
+        const animal = createNewAnimal(req.body, animals);
+
+        res.json(req.body);
+    }
+});
 
 
 
