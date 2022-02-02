@@ -1,10 +1,11 @@
+const apiRoutes = require('./routes/apiRoutes');
+const htmlRoutes = require('./routes/htmlRoutes');
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const { listen } = require('express/lib/application');
 const PORT = process.env.PORT || 3001;
-const apiRoutes = require('./routes/apiRoutes');
-const htmlRoutes = require('./routes/htmlRoutes');
+
 const app = express();
 
 //Parse Incoming Data
@@ -12,10 +13,14 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 //parse incoming JSON data
 app.use(express.json());
-
 app.use(express.static('public'));
+//This is our way of telling the server that any time a client navigates to <ourhost>/api, 
+//the app will use the router we set up in apiRoutes. If / is the endpoint, 
+//then the router will serve back our HTML routes.
 app.use('/api', apiRoutes);
 app.use('/', htmlRoutes);
+
+
 
 //creating a route that the front-end can request data from.
 const { animals } = require('./data/animals.json');
